@@ -147,6 +147,77 @@
 - **Encryption**: unencrypted
 - **SELinux**: enforcing
 
+## Boot Modes
+
+The Venue 8 3840 has four boot modes controlled by the IAFW (IA Firmware)
+and OSNIB (OS-to-firmware notification information block):
+
+### Normal Boot
+- Power button press
+- Boots OSIP → kernel → Android
+
+### Recovery Mode
+- **Hold Vol-Up** during power-on
+- Boots the recovery partition
+- Used for factory reset, sideloading
+
+### Fastboot / Droidboot Mode
+- **Hold Vol-Down + Power** from power-off, OR
+- `adb reboot bootloader` from running Android
+- Shows Droidboot provisioning screen (gears)
+- Accepts `fastboot` commands (but `fastboot flash boot` fails on OSIP platforms — use DnX instead)
+
+### DnX (Download and Execute) Mode
+DnX is Intel's low-level firmware provisioning protocol. The device
+enumerates as USB VID `0x8086`, PID `0xe005`.
+
+**Entry Method 1 — Hardware (from Dell OSS_A195.pdf, pp. 4, 7-8):**
+1. Power off completely (hold power 15+ seconds)
+2. **Hold Volume Up** on the tablet
+3. **Plug in USB cable** while holding Vol-Up
+4. Screen stays black — device is in DnX mode
+5. Release Vol-Up once flash tool detects the device
+
+**Entry Method 2 — Software (from stock kernel reboot_target driver):**
+```
+adb reboot dnx
+```
+The kernel writes target ID `0x14` to OSNIB CMOS at base `0x0E`, then
+reboots. IAFW reads this value and enters DnX mode.
+
+Source: `kernel-src/linux/modules/drivers/platform/x86/reboot_target.c`
+```c
+static const struct name2id NAME2ID[] = {
+    { "main",       0x00 },
+    { "recovery",   0x0C },
+    { "fastboot",   0x0E },
+    { "dnx",        0x14 },
+};
+```
+
+**Entry Method 3 — Automatic fallback:**
+If the IAFW cannot find a valid OSIP entry or encounters an invalid
+checksum, the device falls back to DnX mode automatically. A bricked
+device will enumerate as `8086:e005` when USB is connected.
+
+**Flashing via DnX:**
+```bash
+# Configure dnx_flash.json with osdnx + osimage, then:
+sudo python3 dnx_flash.py
+# Flash tool watches for device, runs protocol automatically
+```
+
+**DnX Protocol Parameters:**
+| Parameter | Value |
+|-----------|-------|
+| USB VID:PID | `8086:e005` |
+| GP Flags | `0x80000007` |
+| OSNIB target ID | `0x14` |
+| FW DnX binary | `fwr_dnx_PRQ_ww27_001.bin` |
+| IFWI image | `IFWI_MERR_PRQ_UOS_TH2_YT2_ww27_001.bin` |
+| OS DnX binary | `osr_dnx_PRQ_ww27_001.bin` |
+| xFSTK tab | "MRD A0/B0 + MOOR A0 + CRC" |
+
 ## Key Driver Modules (loaded)
 | Module | Size | Description |
 |--------|------|-------------|
