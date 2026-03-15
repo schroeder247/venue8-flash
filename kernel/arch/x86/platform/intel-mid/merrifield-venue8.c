@@ -31,6 +31,8 @@
 #include <linux/gpio_keys.h>
 #include <linux/leds.h>
 
+#include <linux/serdev.h>
+
 #include <asm/cpu_device_id.h>
 #include <asm/intel-mid.h>
 
@@ -633,6 +635,108 @@ static struct platform_device venue8_leds_device = {
 };
 
 /* ------------------------------------------------------------------ */
+/*  WiFi SDIO power regulator                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The BCM4335 WiFi chip on SDIO is powered by GPIO 96 ("vwlan").
+ * Mainline brcmfmac binds to the SDIO device once the SDHCI controller
+ * enumerates it. We provide a fixed regulator tied to the SDIO host's
+ * vmmc supply so the card is powered before SDIO scan.
+ *
+ * The SDIO host for WiFi is PCI 00:01.3 (SDHCI Merrifield slot 1).
+ */
+static struct regulator_consumer_supply venue8_wlan_vmmc_supply = {
+	.supply = "vmmc",
+	.dev_name = "0000:00:01.3",	/* SDHCI WiFi slot */
+};
+
+static struct regulator_init_data venue8_wlan_vmmc_data = {
+	.constraints = {
+		.valid_ops_mask = REGULATOR_CHANGE_STATUS,
+	},
+	.num_consumer_supplies = 1,
+	.consumer_supplies = &venue8_wlan_vmmc_supply,
+};
+
+static struct fixed_voltage_config venue8_wlan_en_config = {
+	.supply_name	= "wlan_en",
+	.microvolts	= 1800000,
+	.gpio		= 96,		/* GPIO_WLAN_EN */
+	.startup_delay	= 250000,	/* 250ms for BCM4335 boot */
+	.enable_high	= 1,
+	.enabled_at_boot = 0,
+	.init_data	= &venue8_wlan_vmmc_data,
+};
+
+static struct platform_device venue8_wlan_en_device = {
+	.name = "reg-fixed-voltage",
+	.id = 2,	/* IDs 0,1 taken by audio regulators */
+	.dev = {
+		.platform_data = &venue8_wlan_en_config,
+	},
+};
+
+/* ------------------------------------------------------------------ */
+/*  Bluetooth serial (BCM4335 on HSU UART port 0)                      */
+/* ------------------------------------------------------------------ */
+
+/*
+ * The BCM4335 Bluetooth is connected to HSU UART port 0 (PCI 00:04.0,
+ * Intel High Speed UART). The hci_bcm driver (CONFIG_BT_HCIUART_BCM)
+ * manages power via the GPIOs in venue8_bt_gpios lookup table above.
+ *
+ * On Merrifield, the UART is a PCI device, not a platform serdev.
+ * The hci_bcm driver attaches via the bcm_bt_lpm platform_device and
+ * opens the tty directly. We register the platform device with the
+ * UART port number so hci_bcm can find it.
+ */
+static const struct property_entry venue8_bt_props[] = {
+	PROPERTY_ENTRY_U32("max-speed", 3000000),
+	PROPERTY_ENTRY_STRING("local-bd-address", ""),
+	{ },
+};
+
+static const struct software_node venue8_bt_node = {
+	.name = "bcm_bt_lpm",
+	.properties = venue8_bt_props,
+};
+
+static struct platform_device venue8_bt_device = {
+	.name = "bcm_bt_lpm",
+	.id = -1,
+};
+
+/* ------------------------------------------------------------------ */
+/*  Display GPIO lookup table                                          */
+/* ------------------------------------------------------------------ */
+
+/*
+ * LCD power and reset GPIOs for the Tangier DSI display driver.
+ * gpio-189 (LCD_3P3) = 3.3V panel supply
+ * gpio-190 (LCD_RESET) = panel reset (active low)
+ */
+static struct gpiod_lookup_table venue8_display_gpios = {
+	.dev_id = "0000:00:02.0",	/* PCI GPU device (display regs) */
+	.table = {
+		GPIO_LOOKUP("merrifield_pinctrl", 189,
+			    "lcd-power", GPIO_ACTIVE_HIGH),
+		GPIO_LOOKUP("merrifield_pinctrl", 190,
+			    "lcd-reset", GPIO_ACTIVE_HIGH),
+		{ },
+	},
+};
+
+/* ------------------------------------------------------------------ */
+/*  Camera platform device                                             */
+/* ------------------------------------------------------------------ */
+
+/*
+ * Camera GPIO lookup table is in venue8_camera.c module.
+ * We just register a platform device so the camera module can bind.
+ */
+
+/* ------------------------------------------------------------------ */
 /*  Sensor interrupt GPIO lookup table                                 */
 /* ------------------------------------------------------------------ */
 
@@ -701,6 +805,10 @@ static void __init venue8_register_regulators(void)
 	ret = platform_device_register(&venue8_vbat_device);
 	if (ret)
 		pr_err("failed to register V_BAT regulator: %d\n", ret);
+
+	ret = platform_device_register(&venue8_wlan_en_device);
+	if (ret)
+		pr_err("failed to register WLAN regulator: %d\n", ret);
 }
 
 static void __init venue8_register_i2c_devices(void)
@@ -738,6 +846,7 @@ static void __init venue8_register_gpio_tables(void)
 	gpiod_add_lookup_table(&venue8_audio_gpios);
 	gpiod_add_lookup_table(&venue8_sensor_gpios);
 	gpiod_add_lookup_table(&venue8_sdcard_gpios);
+	gpiod_add_lookup_table(&venue8_display_gpios);
 }
 
 static int __init venue8_register_platform_devices(void)
@@ -783,6 +892,17 @@ static int __init venue8_register_platform_devices(void)
 	ret = platform_device_register(&venue8_leds_device);
 	if (ret)
 		pr_err("failed to register LEDs: %d\n", ret);
+
+	/* Bluetooth BCM4335 platform device */
+	ret = device_add_software_node(&venue8_bt_device.dev,
+				       &venue8_bt_node);
+	if (!ret) {
+		ret = platform_device_register(&venue8_bt_device);
+		if (ret) {
+			pr_err("failed to register BT device: %d\n", ret);
+			device_remove_software_node(&venue8_bt_device.dev);
+		}
+	}
 
 	return 0;
 

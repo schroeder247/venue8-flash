@@ -294,23 +294,23 @@ Create `vendor/dell/venue8/`:
 ## Effort Estimate
 | Component | Effort | Status |
 |-----------|--------|--------|
-| Platform bringup (SFI replacement) | HIGH | Not started |
-| GPU (PowerVR Rogue) | HIGH | Analysis done |
-| Display (tngdisp → DRM/KMS) | MEDIUM | Analysis done |
-| WiFi (BCM4335) | LOW | Mainline brcmfmac |
-| Bluetooth | LOW | Mainline btbcm |
-| Camera (atomisp) | MEDIUM | Mainline staging |
-| Audio (WM8958 + SST) | MEDIUM | Mainline codec |
-| Touch (Synaptics + ELAN) | LOW | Mainline drivers |
-| Sensors (LSM303D, L3GD20) | LOW | Mainline IIO |
-| Power (BQ24261 + BQ27441) | LOW | Mainline drivers |
-| HSIC USB for modem | MEDIUM | ~500 LOC port |
-| Modem control driver | MEDIUM | ~400 LOC port |
+| Platform bringup (SFI replacement) | HIGH | **DONE** — merrifield-venue8.c (900+ LOC) |
+| GPU (PowerVR Rogue) | HIGH | Deferred — pvr driver in kernel 6.8+, simpledrm for now |
+| Display (tngdisp → DRM/KMS) | MEDIUM | **DONE** — venue8_display.c DRM driver + backlight |
+| WiFi (BCM4335) | LOW | **DONE** — mainline brcmfmac + SDIO power regulator |
+| Bluetooth | LOW | **DONE** — mainline btbcm + platform device + GPIOs |
+| Camera (atomisp) | MEDIUM | **DONE** — venue8_camera.c platform glue + staging OV5693/OV2722 |
+| Audio (WM8958 + SST) | MEDIUM | **DONE** — mainline mrfld_wm8958.c + regulators + platform device |
+| Touch (Synaptics + ELAN) | LOW | **DONE** — mainline rmi4 + elan + I2C board info |
+| Sensors (LSM303D, L3GD20) | LOW | **DONE** — mainline ST IIO + I2C board info + GPIO IRQs |
+| Power (BQ24261 + BQ27441) | LOW | **DONE** — mainline bq27xxx + bq24257 + I2C board info |
+| HSIC USB for modem | MEDIUM | **DONE** — ehci_hsic.c (~315 LOC) |
+| Modem control driver | MEDIUM | **DONE** — modem_control.c (~663 LOC) |
 | mmgr firmware loading | LOW* | Run binary natively |
 | Telephony (Android RIL) | MEDIUM | Shim needed |
 | Telephony (oFono/UBports) | LOW | ifxmodem plugin |
 | AOSP device tree | MEDIUM | Not started |
-| OSIP boot image tooling | MEDIUM | stitch.py exists |
+| OSIP boot image tooling | MEDIUM | **DONE** — make_bootimg.py + flash_kernel.sh |
 
 \* LOW if running proprietary binary; HIGH if reverse-engineering protocol
 

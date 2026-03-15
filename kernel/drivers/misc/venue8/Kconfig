@@ -24,3 +24,18 @@ config DELL_VENUE8_EHCI_HSIC
 
 	  To compile this driver as a module, choose M here: the module
 	  will be called ehci_hsic.
+
+config DELL_VENUE8_CAMERA
+	tristate "Dell Venue 8 3840 camera platform glue"
+	depends on X86_INTEL_MID
+	depends on INTEL_SCU_IPC
+	depends on VIDEO_ATOMISP || VIDEO_V4L2
+	depends on GPIOLIB
+	help
+	  Camera sensor platform glue for the Dell Venue 8 3840.
+	  Provides power sequencing, clock control, and CSI-2 configuration
+	  callbacks for the OV5693 (rear, 5MP) and OV2722 (front, 2MP)
+	  cameras connected to the Merrifield ISP2400 via MIPI CSI-2.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called venue8_camera.

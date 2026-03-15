@@ -1,0 +1,14 @@
+config DRM_VENUE8_DISPLAY
+	tristate "Dell Venue 8 3840 Tangier MIPI DSI display"
+	depends on DRM && PCI && X86
+	select DRM_KMS_HELPER
+	select DRM_GEM_SHMEM_HELPER
+	help
+	  DRM driver for the Dell Venue 8 3840's MIPI DSI display panel
+	  (1200x1920 AUO/Innolux). The display controller is part of the
+	  Merrifield (Tangier) SoC's PowerVR G6400 GPU PCI device.
+
+	  This driver provides a simple framebuffer console via
+	  drm_simple_display_pipe. It does not provide GPU acceleration.
+
+	  If unsure, say N.
