@@ -1,0 +1,26 @@
+config DELL_VENUE8_MODEM_CONTROL
+	tristate "Dell Venue 8 3840 modem control driver"
+	depends on X86_INTEL_MID
+	depends on INTEL_SCU_IPC
+	depends on GPIOLIB
+	help
+	  Control driver for the Intel XMM 7160 LTE modem on the Dell
+	  Venue 8 3840 tablet. Manages modem power via GPIO and Basin Cove
+	  PMIC, and provides /dev/mdm_ctrl for the userspace modem manager
+	  (mmgr) to control modem state.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called modem_control.
+
+config DELL_VENUE8_EHCI_HSIC
+	tristate "Dell Venue 8 3840 EHCI HSIC companion driver"
+	depends on X86_INTEL_MID
+	depends on USB_EHCI_PCI
+	help
+	  Companion driver for the EHCI HSIC controller that connects
+	  to the Intel XMM 7160 modem on the Dell Venue 8 3840. Provides
+	  HSIC PHY initialization and sysfs interface for the modem
+	  manager (mmgr) to enable/disable the USB link.
+
+	  To compile this driver as a module, choose M here: the module
+	  will be called ehci_hsic.

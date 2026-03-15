@@ -1,0 +1,8 @@
+{
+  "fwdnx": "fwr_dnx_PRQ_ww27_001.bin",
+  "fwimage": "IFWI_MERR_PRQ_UOS_TH2_YT2_ww27_001.bin",
+  "osdnx": "",
+  "osimage": "",
+  "gpflags": "0x80000007",
+  "device_timeout": 120
+}

@@ -1,0 +1,67 @@
+# =============================================================================
+# Dell Venue 8 3840 — .gitignore
+# =============================================================================
+# The project directory contains large binary artifacts (kernel trees, factory
+# images, firmware) that must NOT be committed. Only project-specific source
+# code, scripts, configs, and documentation are tracked.
+# =============================================================================
+
+# --- Full kernel trees (multi-GB) ---
+kernel-src/
+project/kernel-port/android15-6.6/
+# Venue8-specific kernel files are tracked in kernel/ (copied from the tree)
+
+# --- Factory image archives ---
+*.tgz
+*.zip
+images-YTD802A519500/
+
+# --- Built boot images and intermediates ---
+boot-*.img
+*.img.POS.bin
+build-output/
+modules_out/
+
+# --- Large extracted artifacts ---
+extracted/system.raw.img
+extracted/initrd/
+extracted/system/
+extracted/vmlinux
+
+# --- Firmware binaries (proprietary, device-extracted) ---
+extracted/firmware/
+# Firmware install locations documented in install_firmware.sh
+
+# --- Vendor binary blobs (proprietary ELF binaries and shared libs) ---
+extracted/vendor-blobs/bin/
+extracted/vendor-blobs/lib/
+extracted/vendor-blobs/vendor/
+extracted/vendor-blobs/kernel-modules/
+extracted/vendor-blobs/etc/firmware/
+# Text config files in extracted/vendor-blobs/etc/ ARE tracked
+# MANIFEST.txt IS tracked (documents what was extracted)
+
+# --- Binary firmware / IFWI images ---
+*.bin
+*.hcd
+!osip_header.bin
+# osip_header.bin is needed by make_bootimg.py (14KB, safe to track)
+
+# --- Kernel/vmlinux binaries ---
+bzImage-*
+vmlinux.gz
+ramdisk.gz
+initrd.gz
+initramfs-*.gz
+
+# --- AOSP / UBports stubs (empty directories) ---
+project/aosp/
+project/ubports/
+
+# --- Editor / OS junk ---
+*~
+*.swp
+*.swo
+.DS_Store
+__pycache__/
+*.pyc

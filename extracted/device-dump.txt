@@ -1,0 +1,142 @@
+# Dell Venue 8 3840 - Live Device Dump
+# Extracted via ADB on 2026-03-12
+# Device serial: 01234567890123456789
+
+## GPIO Map (/sys/kernel/debug/gpio)
+# Controller: pci/0000:00:0c.0 (merrifield_pinctrl), GPIOs 0-191
+
+gpio-1   (cam_en              ) out lo
+gpio-2   (cam_pwdn            ) out lo
+gpio-3   (vga_ldo_en          ) out lo
+gpio-7   (cam_pwr_en          ) out lo
+gpio-8   (yellow              ) out lo       # LED?
+gpio-9   (cam_0_rst           ) out lo
+gpio-10  (cam_1_rst           ) out lo
+gpio-13  (VIBRA ENABLE        ) out lo
+gpio-16  (hdmi_hpd            ) in  lo
+gpio-17  (scl                 ) in  hi
+gpio-18  (sda                 ) in  hi
+gpio-44  (als_int             ) out hi       # ALS interrupt
+gpio-46  (INTERRUPT_PIN1_LSM30) in  lo       # LSM303D INT1
+gpio-47  (INTERRUPT_PIN2_LSM30) in  lo       # LSM303D INT2
+gpio-55  (white               ) out lo       # LED?
+gpio-61  (volume_down         ) in  hi       # Volume down button
+gpio-62  (volume_up           ) in  hi       # Volume up button
+gpio-70  (hsic_wakeup         ) in  lo       # HSIC wakeup
+gpio-71  (bcm_bt_lpm          ) out lo       # BT reset/enable
+gpio-77  (sd_cd               ) in  hi       # SD card detect
+gpio-96  (vwlan               ) out hi       # WiFi power enable
+gpio-124 (hsu                 ) in  hi       # HSU (High Speed UART)
+gpio-125 (hsu                 ) out hi
+gpio-126 (hsu                 ) in  hi
+gpio-127 (hsu                 ) out hi
+gpio-128 (hsu                 ) in  lo
+gpio-129 (hsu                 ) out lo
+gpio-130 (hsu                 ) in  hi
+gpio-132 (hsu                 ) in  lo
+gpio-133 (hsu                 ) in  lo
+gpio-134 (hsu                 ) in  hi
+gpio-154 (ModemControl_CORE_DU) in  lo       # Modem coredump
+gpio-163 (WIRELESS_EN1        ) out lo       # WiFi enable secondary?
+gpio-165 (intel_mid_gps_enable) out lo       # GPS enable
+gpio-172 (CAM_0_AF_EN         ) out lo       # Camera 0 autofocus enable
+gpio-173 (hsic_aux            ) in  lo       # HSIC aux
+gpio-175 (                    ) out hi       # Touch reset (unnamed)
+gpio-177 (HDMI_LS_EN          ) in  lo       # HDMI level shift enable
+gpio-180 (ModemControl_RST_OUT) in  hi       # Modem reset out
+gpio-181 (ModemControl_ON     ) out lo       # Modem power on
+gpio-182 (ModemControl_RST_BB ) out hi       # Modem baseband reset
+gpio-183 (                    ) in  hi       # Touch interrupt (unnamed)
+gpio-184 (bcm_bt_lpm          ) out lo       # BT device wakeup
+gpio-185 (bcm_bt_lpm          ) in  lo       # BT host wakeup
+gpio-189 (LCD_3P3             ) in  lo       # LCD 3.3V power
+gpio-190 (LCD_RESET           ) in  hi       # LCD reset
+
+# GPIOs 192-199: platform/msic_gpio (PMIC GPIOs, can sleep)
+
+## I2C Device Map (/sys/bus/i2c/devices/)
+
+Bus  Addr  Name                    Driver/Notes
+1    0x1a  wm8958                  WM8994 MFD (audio codec)
+2    0x55  bq27441                 BQ27441 fuel gauge
+4    0x10  ov5693                  OV5693 rear camera 5MP
+4    0x36  ov2722                  OV2722 front camera 2MP
+6    0x18  lis3dh_acc              LIS3DH accelerometer
+6    0x1e  lsm303d                 LSM303D accel+mag
+6    0x23  bh1721als               BH1721 ambient light sensor
+6    0x6b  l3gd20_gyr              L3GD20 gyroscope
+7    0x10  ektf2k                  ELAN eKTF2k touchscreen
+7    0x20  synaptics_dsx_i2c       Synaptics DSX touchscreen (primary)
+8    0x6b  bq24261_charger         BQ24261 charger (on PMIC I2C)
+
+## I2C Adapter → PCI Mapping
+
+i2c-1  → 0000:00:08.0  (8086:1195) Designware
+i2c-2  → 0000:00:08.1  (8086:1195) Designware
+i2c-3  → 0000:00:08.2  (8086:1195) Designware
+i2c-4  → 0000:00:08.3  (8086:1195) Designware
+i2c-5  → 0000:00:09.0  (8086:1196) Designware
+i2c-6  → 0000:00:09.1  (8086:1196) Designware
+i2c-7  → 0000:00:09.2  (8086:1196) Designware
+i2c-8  → (no PCI)      "PMIC I2C Adapter" (Basin Cove internal)
+
+## Power Supply
+
+bq24261_charger:
+  POWER_SUPPLY_NAME=bq24261_charger
+  POWER_SUPPLY_MODEL_NAME=bq24261
+  POWER_SUPPLY_MANUFACTURER=TI
+  POWER_SUPPLY_TYPE=USB
+  POWER_SUPPLY_MAX_CHARGE_CURRENT=1500
+  POWER_SUPPLY_CHARGE_VOLTAGE=4360
+
+bq27441_battery:
+  (fuel gauge)
+
+## Input Devices (/proc/bus/input/devices)
+
+input0: als_1721 (ambient light sensor)
+input1: l3gd20_gyr @ i2c-6/6-006b
+input2: lsm303d_acc @ i2c-6/6-001e
+input3: lsm303d_mag @ i2c-6/6-001e
+input4: synaptics_dsx (touch_input) @ i2c-7/7-0020 [PRIMARY TOUCH]
+input5: gpio-keys (volume up/down)
+input6: mid_powerbtn (power button)
+input7: wm8958-audio Intel MID Audio Jack @ platform/mrfld_wm8958/sound/card1
+input8: synaptics_dsx_pen (active_pen) @ i2c-7/7-0020
+
+## RFKILL
+
+rfkill0: phy0 (wlan) — brcmfmac-wifi
+rfkill1: (wlan)
+rfkill2: bcm43xx Bluetooth (bluetooth)
+
+## HSIC Sysfs (/sys/devices/pci0000:00/0000:00:10.0/)
+
+hsic_enable = 1
+L2_autosuspend_enable = 1
+
+## DMI/SMBIOS
+
+board_name:    Silver Ridge
+board_vendor:  Intel Corporation
+product_name:  Merrifield
+sys_vendor:    Intel Corporation
+board_version: 0
+bios_version:  509
+modalias:      dmi:bvnIntel(R)UltraMobileFirmwareDevelopmentKit:bvr509:bd2014.07.1617.35.04:svnIntelCorporation:pnMerrifield:pvrA1:rvnIntelCorporation:rnSilverRidge:rvr0:cvnIntelCorporation:ct11:cvrN/A:
+
+## SFI Tables (root-only, not dumped)
+
+Available: APIC CPUS DEVS FREQ GPIO MCFG MMAP OEM0 OEMB SYST WAKE XSDT
+
+## Firmware Files (/system/etc/firmware/)
+
+fw_sst_119a.bin            - Audio SST DSP firmware (PCI 0x119a)
+fw_bcmdhd.bin_4335_b0      - BCM4335 WiFi firmware
+bcmdhd_aob.cal_4335_b0_*   - BCM4335 WiFi calibration (edge/level)
+bt/BCM4335B0_*.hcd          - BCM4335 Bluetooth firmware
+shisp_2400b0_v21.bin        - ISP2400 camera firmware
+isp_acc_*_css21_2400b0.bin  - ISP acceleration firmware (5 blobs)
+modem/modem.zip             - XMM 7160 modem firmware
+modem/modem_nvm.zip         - XMM 7160 modem NVM data
