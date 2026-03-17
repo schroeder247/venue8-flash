@@ -118,6 +118,15 @@ def main():
         struct.pack_into("<I", osip_header, OSII_SIZE_OFFSET, image_blocks)
         print(f"OSII size: {image_blocks} blocks ({image_blocks * 512} bytes)")
 
+        # Recalculate OSIP header checksum (XOR of first 56 bytes with
+        # checksum byte zeroed). Required by IAFW and droidboot validation.
+        osip_header[7] = 0  # zero checksum field before calculation
+        xor = 0
+        for b in osip_header[:56]:
+            xor ^= b
+        osip_header[7] = xor
+        print(f"OSIP checksum: 0x{xor:02X}")
+
         out.write(bytes(osip_header))
 
         # 2. Cmdline (1024 bytes, null-padded)
