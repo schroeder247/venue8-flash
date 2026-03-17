@@ -207,6 +207,43 @@ sudo python3 dnx_flash.py
 # Flash tool watches for device, runs protocol automatically
 ```
 
+### Fastboot Flash — Boot Image Requirements
+
+**Critical**: `fastboot flash boot` on Merrifield droidboot validates the
+`$MOSS`/`$POSS` signature block. If the signature doesn't match the image
+payload, the flash is rejected with `flash_cmds error!`.
+
+**To flash a custom (unsigned) kernel:**
+1. Use a 512-byte OSIP header only (NO signature block after it)
+2. Set attribute byte at offset 0x34 to `0x01` (unsigned MOS)
+3. Recalculate the XOR checksum at offset 0x07
+4. Payload follows immediately after the 512-byte header
+
+**Image layout that works with `fastboot flash boot`:**
+```
+[OSIP header: 512 bytes]     ← $OS$ magic, OSII entry, checksum
+[cmdline: 1024 bytes]        ← kernel command line, null-padded
+[sizes: 3072 bytes]          ← kernel_sz, ramdisk_sz, flags, magic
+[bootstub: 8192 bytes]       ← x86 boot stub
+[kernel: bzImage]            ← page-aligned
+[ramdisk: ramdisk.gz]        ← gzip cpio
+[padding to 512-byte boundary]
+```
+
+**Image layout that FAILS with `fastboot flash boot`:**
+```
+[OSIP header: 512 bytes]
+[signature: 728 bytes]       ← $MOSS block — droidboot validates this!
+[cmdline + sizes + bootstub + kernel + ramdisk]
+```
+
+The factory boot.img has attribute `0x00` (signed) with a valid `$MOSS`
+signature matching its kernel. Custom kernels MUST use unsigned format
+(attribute `0x01`, no signature block) or the signature will fail validation.
+
+**OSIP header checksum**: XOR of all 56 header bytes (with byte 7 zeroed).
+Must be recalculated after ANY field modification (size, attribute, etc.).
+
 **DnX Protocol Parameters:**
 | Parameter | Value |
 |-----------|-------|
